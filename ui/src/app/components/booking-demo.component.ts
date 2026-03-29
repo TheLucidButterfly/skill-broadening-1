@@ -1,9 +1,9 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { HttpClient } from '@angular/common/http';
-import { timeout, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { BookingService } from '../services/booking.service';
+import { finalize } from 'rxjs/operators';
+import { HealthResponse } from '../models/health';
 
 @Component({
   selector: 'booking-demo',
@@ -26,32 +26,26 @@ export class BookingDemo {
   testValue = 0;
   loading = false;
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private cdr: ChangeDetectorRef, private bookingService: BookingService) {}
 
   callHealth() {
     this.loading = true;
-    this.output = 'calling http://localhost:3000/health...';
-    this.http
-      .get('http://localhost:3000/health', { observe: 'response' })
+    this.output = '';
+    this.bookingService
+      .health()
       .pipe(
-        timeout(5000),
         finalize(() => {
           this.loading = false;
           this.cdr.detectChanges();
         })
       )
       .subscribe({
-        next: (res: any) => {
-          this.output = JSON.stringify(res.body, null, 2);
+        next: (health: HealthResponse) => {
+          this.output = JSON.stringify(health, null, 2);
         },
-        error: (err) => {
-          if (err && err.name === 'TimeoutError') {
-            this.output = 'Error: request timed out (5s)';
-          } else {
-            this.output = 'Error: ' + (err.message || JSON.stringify(err));
-          }
+        error: (err: any) => {
+          this.output = 'Error: ' + (err?.message || String(err));
         },
-
       });
   }
 

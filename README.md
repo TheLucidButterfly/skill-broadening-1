@@ -5,27 +5,24 @@ Learning project that demonstrates a simple event-driven full-stack architecture
 Services:
 - `ui` (Angular SPA)
 - `api` (NestJS backend)
-- `postgres` (bookings persistence)
-- `redis` (cache / future use)
-- `redpanda` (Kafka-compatible event bus)
-- `kafka-ui` (UI to inspect topics)
 
-Quick start (Docker Compose):
+Local development:
 
-1. Build and run everything:
+1. API (development):
 
 ```bash
-docker compose build
-docker compose up
+cd api
+npm install
+npm run start:dev
 ```
 
-2. Services (default ports):
-- Postgres: 5432
-- Redis: 6379
-- Redpanda (Kafka): 9092
-- Kafka UI: 8080
-- API: 3000
-- UI: 4200
+2. UI (development):
+
+```bash
+cd ui
+npm install
+npm run start
+```
 
 API endpoints (examples):
 - POST /bookings -> create booking

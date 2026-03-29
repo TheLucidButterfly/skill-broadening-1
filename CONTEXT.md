@@ -6,24 +6,20 @@ This document records the purpose, stack, structure, and current development sta
 
 A minimal, learn-by-building project to practice event-driven backend architecture, infra tooling, and full-stack wiring. The business concept is intentionally simple: a booking + reminder platform where users can create/list/view bookings and the system can schedule reminders via events.
 
-Keep business logic intentionally small — the learning focus is on NestJS architecture, Docker/Docker Compose, Kafka-style pub/sub (Redpanda), Redis, and PostgreSQL.
+Keep business logic intentionally small — the learning focus is on NestJS architecture, event-driven patterns, and PostgreSQL.
 
 ## Tech stack
 
 - Frontend: Angular (existing app in `ui/`)
 - Backend: NestJS (new app in `api/`)
-- Database: PostgreSQL
-- Cache: Redis (placeholder module exists; not fully integrated yet)
-- Event bus: Redpanda (Kafka-compatible)
-- Event client: kafkajs
-- ORM: TypeORM
-- Container orchestration for local dev: Docker Compose
+-- Database: PostgreSQL
+-- ORM: TypeORM
 
 ## High-level architecture
 
 - `ui/` — Angular SPA (kept as-is; minimal scaffolding added for models and API service)
 - `api/` — NestJS monolith with modular layout (bookings, events, database, cache, health)
-- `docker-compose.yml` — runs postgres, redis, redpanda, kafka-ui, api, and ui for local development
+-- `docker-compose.yml` — (removed) was previously used for local infra but is not required for current local development
 
 Events:
 - When a booking is created the backend publishes a `booking.created` event (JSON payload) to the event bus.
@@ -33,13 +29,12 @@ Events:
 - `api/` — NestJS app skeleton
   - `src/app.module.ts`, `src/main.ts`
   - `src/bookings/*` — controller, service, entity, DTO
-  - `src/events/*` — `EventsService` (producer using kafkajs)
   - `src/database/database.module.ts` — TypeORM config (synchronize: true for dev)
-  - `api/.env.example`, `api/Dockerfile`, `api/package.json`, tsconfig files
+   - `api/.env.example`, `api/package.json`, tsconfig files
 - `ui/` additions
   - `src/app/models/booking.ts`
   - `src/app/services/booking.service.ts` (simple API client)
-- `docker-compose.yml` — brings up postgres, redis, redpanda, kafka-ui, api, ui
+ - `docker-compose.yml` — was used previously for local infra; removed from the repo
 - `README.md` — basic startup instructions
 - `CONTEXT.md` (this file)
 
@@ -49,13 +44,12 @@ Paths (useful links):
 - [api/src/bookings/entities/booking.entity.ts](api/src/bookings/entities/booking.entity.ts)
 - [api/src/events/events.service.ts](api/src/events/events.service.ts)
 - [ui/src/app/services/booking.service.ts](ui/src/app/services/booking.service.ts)
-- [docker-compose.yml](docker-compose.yml)
+-- (docker-compose.yml removed)
 - [README.md](README.md)
 
 ## Current runtime / dev status (as of this session)
 
-- The NestJS `api` skeleton and files were created, including a simple `EventsService` that attempts to connect to the broker on module init.
-- `docker-compose.yml` was added to run Postgres, Redis, Redpanda, Kafka UI, API, and UI. Redpanda (vectorized/redpanda) was chosen for local developer convenience.
+- The NestJS `api` skeleton and files were created. Event publishing scaffolding existed earlier but was removed to simplify local development.
 - Angular `ui` was left intact; small service/model files were added to consume the API.
 - You have started installing dependencies in `ui/` (last `npm i --silent` completed in the `ui` terminal).
 - The `api` dev server was attempted (`npm run start:dev`) and returned a non-zero exit (exit code 130) in the provided terminal history — likely due to missing dependencies or environment (e.g., `@nestjs/*`, TypeORM, kafkajs, etc.).
@@ -63,7 +57,7 @@ Paths (useful links):
 Important runtime notes / gotchas:
 - `api` expects environment variables (see `api/.env.example`) when run in Docker. When running locally, `@nestjs/config` and `dotenv` should be installed (they were installed in the workspace commands).
 - TypeORM is configured with `synchronize: true` to speed up development — remove or replace with migrations for production-like workflows.
-- `EventsService` will try to connect to Redpanda at `KAFKA_BROKER` (default `redpanda:9092`) during module init; if Redpanda isn't available the service logs a warning. This is fine for development but consider adding retry/backoff logic later.
+-- Event publishing is currently disabled/removed from the codebase to avoid external infra dependencies during local development.
 
 ## Next recommended steps (short-term)
 
@@ -75,16 +69,26 @@ Important runtime notes / gotchas:
    npm run start:dev
    ```
 
-2. Start the full stack with Docker Compose to test end-to-end event publishing:
+2. Start services locally:
 
-   ```bash
-   docker compose build
-   docker compose up
-   ```
+    - API (development):
+
+       ```bash
+       cd api
+       npm install
+       npm run start:dev
+       ```
+
+    - UI (development):
+
+       ```bash
+       cd ui
+       npm install
+       npm run start
+       ```
 
 3. If `api` fails to start, check logs for missing packages or connection errors. Common fixes:
    - Ensure `node_modules` installed in `api/`.
-   - Ensure Docker containers (Postgres, Redpanda) are up when running `api` in Docker.
 
 4. Add a small consumer service (can be another NestJS module or a simple Node script) that subscribes to `booking.created` to simulate reminder scheduling. This helps close the event loop and practice consuming messages.
 
