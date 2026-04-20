@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterModule, RouterOutlet } from '@angular/router';
 import { BookingDemo } from "./components/booking-demo.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, BookingDemo],
+  imports: [RouterModule, RouterOutlet],
   templateUrl: './app.html',
   styleUrls: ['./app.scss']
 })

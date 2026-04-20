@@ -13,15 +13,13 @@ export class BookingService {
   constructor(private http: HttpClient) {}
 
   create(payload: { customerName: string; customerEmail: string; appointmentTime: string }): Observable<Booking> {
-    return this.http.post<Booking>(`${this.base}/bookings`, payload);
+    const base = getApiBase();
+    return this.http.post<Booking>(`${base}/bookings`, payload);
   }
 
   list(): Observable<Booking[]> {
-    return this.http.get<Booking[]>(`${this.base}/bookings`);
-  }
-
-  get(id: string): Observable<Booking> {
-    return this.http.get<Booking>(`${this.base}/bookings/${id}`);
+    const base = getApiBase();
+    return this.http.get<Booking[]>(`${base}/bookings`);
   }
 
   /**

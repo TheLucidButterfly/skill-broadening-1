@@ -101,6 +101,10 @@ Important runtime notes / gotchas:
 - Add a simple consumer that creates reminder tasks and stores them or enqueues them for delivery.
 - Add authentication (simple JWT) for API endpoints.
 
+## Directives
+
+- The project follows a local-first immediate directive: provide one minimal, end-to-end booking flow that runs entirely locally with in-memory storage. See [DIRECTIVES.md](DIRECTIVES.md) for the full directive and acceptance criteria.
+
 ## Contact points in the code for quick edits
 
 - Booking model & persistence: `api/src/bookings/entities/booking.entity.ts`
